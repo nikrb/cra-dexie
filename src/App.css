@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: center;
 }
 
 .App-logo {
@@ -57,10 +58,8 @@ button:focus {
 }
 
 li {
-  display:flex;
+  list-style-type: none;
 }
 
 .container {
-  text-align: center;
-  margin: 0 auto;
 }
