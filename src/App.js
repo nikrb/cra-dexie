@@ -6,8 +6,9 @@ import Dexie from 'dexie';
 
 class App extends Component {
   state = {
+    id: 0,
     name : "",
-    units: "",
+    units: "kg",
     foods : []
   };
   componentWillMount = () => {
@@ -22,15 +23,28 @@ class App extends Component {
     const { name, units} = this.state;
     console.log( "populate foods:", name, units);
     if( name.length === 0 || units.length === 0){
+      console.log( `missing data name [${name}] units [${units}]`);
       return;
     }
-    this.setState( {name: ""});
+    // this.setState( {name: ""});
     this.db.foods.add( { name: name, units: units})
     .then( ( res) => {
       console.log( "successfully put food:", res);
     })
     .catch( (e) => {
       console.error( "failed to add foods:", e);
+    });
+  };
+  updateFood = () => {
+    const {id, name, units} = this.state;
+    if( id === 0 || name.length === 0 || units.length === 0){
+      console.log( `missing data id[${id}] name[${name}] units[${units}]`);
+      return;
+    }
+    this.db.foods.update( this.state.id,
+      {name: this.state.name, units: this.state.units})
+    .then( (response) => {
+      console.log( "foods update response:", response);
     });
   };
   fetchFoods = () => {
@@ -43,6 +57,11 @@ class App extends Component {
       console.error( "fetch foods failed:", e);
     });
   };
+  foodSelected = function( food){
+    console.log( "foodSelected:", food);
+    const { id, name, units} = food;
+    this.setState( { id, name, units});
+  };
   foodNameChange = (e) => {
     this.setState( { name: e.target.value});
   };
@@ -50,19 +69,14 @@ class App extends Component {
     this.setState( {units: e.target.value});
   }
   render() {
-    const foods = this.state.foods.map( (food,ndx) => <li key={ndx}>{food.name} - {food.units}</li>);
+    const foods = this.state.foods.map( (food,ndx) => <li key={ndx}
+      onClick={this.foodSelected.bind( this, food)}>{food.name} - {food.units}</li>);
     const food_entry = {
       margin : "10px"
     };
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <h2>Hello Dexie!</h2>
         <div className="container">
           <div style={food_entry}>
             <input type="text" value={this.state.name} onChange={this.foodNameChange} />
@@ -71,6 +85,7 @@ class App extends Component {
               <option value="unit">Unit</option>
             </select>
             <button type="button" onClick={this.popFoods} >Add Food</button>
+            <button type="button" onClick={this.updateFood} >Update</button>
           </div>
           <button type="button" onClick={this.fetchFoods} >Refresh List</button>
           <h3>Food List</h3>
